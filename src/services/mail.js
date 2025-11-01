@@ -66,4 +66,14 @@ export async function fetchUnreadCount(email, token) {
   return all.filter((m) => !m.read).length
 }
 
+export async function deleteInboxMail(email, messageId, token) {
+  const key = sanitizeEmail(email)
+  return rest(`/userInbox/${key}/${messageId}`, 'DELETE', undefined, token)
+}
+
+export async function deleteSentMail(email, messageId, token) {
+  const key = sanitizeEmail(email)
+  return rest(`/userSent/${key}/${messageId}`, 'DELETE', undefined, token)
+}
+
 export { sanitizeEmail }

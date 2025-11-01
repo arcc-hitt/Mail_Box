@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { fetchInbox, markAsRead } from '../services/mail'
+import { fetchInbox, markAsRead, deleteInboxMail } from '../services/mail'
 import { auth } from '../firebase'
 
 function Inbox() {
@@ -45,6 +45,20 @@ function Inbox() {
     }
   }
 
+  const deleteMessage = async (id) => {
+    const msg = items.find((x) => x.id === id)
+    try {
+      await deleteInboxMail(email, id, token)
+      setItems((prev) => prev.filter((x) => x.id !== id))
+      if (msg && !msg.read) {
+        window.dispatchEvent(new CustomEvent('mail:read-changed', { detail: { delta: -1 } }))
+      }
+    } catch (e) {
+      console.error('Failed to delete message', e)
+      alert('Failed to delete message. Please try again.')
+    }
+  }
+
   if (loading) return <div className="text-secondary">Loading…</div>
 
   return (
@@ -68,7 +82,10 @@ function Inbox() {
                         </div>
                         <div className="small text-secondary">From: {m.from}</div>
                       </div>
-                      <div className="small text-secondary">{new Date(m.createdAt).toLocaleString()}</div>
+                      <div className="d-flex align-items-center gap-2">
+                        <div className="small text-secondary">{new Date(m.createdAt).toLocaleString()}</div>
+                        <button type="button" className="btn btn-sm btn-outline-danger" onClick={(e) => { e.stopPropagation(); deleteMessage(m.id) }}>Delete</button>
+                      </div>
                     </div>
                   </button>
                   {isOpen && (

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { fetchSent } from '../services/mail'
+import { fetchSent, deleteSentMail } from '../services/mail'
 import { auth } from '../firebase'
 
 function Sent() {
@@ -35,12 +35,23 @@ function Sent() {
           <div className="list-group">
             {items.map((m) => (
               <div key={m.id} className="list-group-item list-group-item-action">
-                <div className="d-flex justify-content-between">
+                <div className="d-flex justify-content-between align-items-center">
                   <div>
                     <div className="fw-semibold">{m.subject || '(no subject)'}</div>
                     <div className="small text-secondary">To: {m.to}</div>
                   </div>
-                  <div className="small text-secondary">{new Date(m.createdAt).toLocaleString()}</div>
+                  <div className="d-flex align-items-center gap-2">
+                    <div className="small text-secondary">{new Date(m.createdAt).toLocaleString()}</div>
+                    <button type="button" className="btn btn-sm btn-outline-danger" onClick={async () => {
+                      try {
+                        await deleteSentMail(email, m.id, token)
+                        setItems((prev) => prev.filter((x) => x.id !== m.id))
+                      } catch (e) {
+                        console.error('Failed to delete', e)
+                        alert('Failed to delete message. Please try again.')
+                      }
+                    }}>Delete</button>
+                  </div>
                 </div>
               </div>
             ))}
