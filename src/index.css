@@ -72,3 +72,12 @@ body {
 
 /* Utility */
 .text-secondary { color: #6c757d !important; }
+
+/* Mail indicator */
+.mail-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #0d6efd;
+  display: inline-block;
+}

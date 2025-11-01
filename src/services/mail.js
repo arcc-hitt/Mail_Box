@@ -55,4 +55,15 @@ export async function fetchSent(email, token) {
   return Object.entries(data || {}).map(([id, v]) => ({ id, ...v })).sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
 }
 
+export async function markAsRead(email, messageId, token) {
+  const key = sanitizeEmail(email)
+  const patch = { read: true, readAt: new Date().toISOString() }
+  return rest(`/userInbox/${key}/${messageId}`, 'PATCH', patch, token)
+}
+
+export async function fetchUnreadCount(email, token) {
+  const all = await fetchInbox(email, token)
+  return all.filter((m) => !m.read).length
+}
+
 export { sanitizeEmail }
