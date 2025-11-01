@@ -1,12 +1,11 @@
 import React from 'react'
+import Signup from './components/Signup'
 
 function App() {
 
   return (
     <>
-      <p>
-        Initial Project Setup
-      </p>
+      <Signup />
     </>
   )
 }
