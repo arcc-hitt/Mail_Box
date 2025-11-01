@@ -31,8 +31,8 @@ function Login() {
       // Get and store ID token
       const token = await user.getIdToken()
       localStorage.setItem('authToken', token)
-      // Navigate to dashboard
-      navigate('/dashboard')
+  // Navigate to home inbox
+  navigate('/home/inbox')
     } catch (err) {
       const code = err?.code || 'auth/unknown'
       let message = 'Invalid credentials. Please try again.'
