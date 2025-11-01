@@ -1,27 +1,11 @@
-import React, { useEffect, useState } from 'react'
-import { fetchSent, deleteSentMail } from '../services/mail'
-import { auth } from '../firebase'
+import React from 'react'
+import { useAuth } from '../hooks/useAuth'
+import { useSent } from '../hooks/useSent'
 
 function Sent() {
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(true)
-  const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : ''
-  const email = auth.currentUser?.email || ''
-
-  useEffect(() => {
-    let mounted = true
-    ;(async () => {
-      try {
-        const data = await fetchSent(email, token)
-        if (mounted) setItems(data)
-      } catch (e) {
-        console.error(e)
-      } finally {
-        if (mounted) setLoading(false)
-      }
-    })()
-    return () => { mounted = false }
-  }, [email, token])
+  const { user, token } = useAuth()
+  const email = user?.email || ''
+  const { items, loading, deleteMessage } = useSent(email, token)
 
   if (loading) return <div className="text-secondary">Loading…</div>
 
@@ -42,15 +26,7 @@ function Sent() {
                   </div>
                   <div className="d-flex align-items-center gap-2">
                     <div className="small text-secondary">{new Date(m.createdAt).toLocaleString()}</div>
-                    <button type="button" className="btn btn-sm btn-outline-danger" onClick={async () => {
-                      try {
-                        await deleteSentMail(email, m.id, token)
-                        setItems((prev) => prev.filter((x) => x.id !== m.id))
-                      } catch (e) {
-                        console.error('Failed to delete', e)
-                        alert('Failed to delete message. Please try again.')
-                      }
-                    }}>Delete</button>
+                    <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => deleteMessage(m.id)}>Delete</button>
                   </div>
                 </div>
               </div>

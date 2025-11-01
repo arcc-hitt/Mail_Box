@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { ref, set } from 'firebase/database'
 import { auth, db } from '../firebase'
-import { signupSchema, passwordChecks } from '../features/auth/validation'
+import { signupSchema, passwordChecks } from '../auth/validation'
 import { useNavigate } from 'react-router-dom'
 
 function Signup() {

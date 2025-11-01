@@ -1,48 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { signOut, onAuthStateChanged } from 'firebase/auth'
-import { auth } from '../firebase'
-import { fetchUnreadCount } from '../services/mail'
+import { useAuth, logout } from '../hooks/useAuth'
+import { useUnreadCount } from '../hooks/useUnreadCount'
 
 function HomeLayout() {
   const navigate = useNavigate()
-  const [userEmail, setUserEmail] = useState('')
-  const [unread, setUnread] = useState(0)
-  const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : ''
+  const { user, token } = useAuth()
+  const userEmail = user?.email || ''
+  const { count: unread, setCount: setUnread } = useUnreadCount(userEmail, token)
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (u) => {
-      setUserEmail(u?.email || '')
-      if (!u && !localStorage.getItem('authToken')) {
-        navigate('/login', { replace: true })
-      }
-      if (u) {
-        try {
-          const cnt = await fetchUnreadCount(u.email, token)
-          setUnread(cnt)
-        } catch (_) {}
-      }
-    })
-    return () => unsub()
-  }, [navigate])
-
-  useEffect(() => {
-    const handler = (e) => {
-      const delta = e.detail?.delta
-      if (typeof delta === 'number') setUnread((x) => Math.max(0, x + delta))
-      if (typeof e.detail?.count === 'number') setUnread(e.detail.count)
-    }
-    window.addEventListener('mail:read-changed', handler)
-    window.addEventListener('mail:unread-count', handler)
-    return () => {
-      window.removeEventListener('mail:read-changed', handler)
-      window.removeEventListener('mail:unread-count', handler)
-    }
-  }, [])
+    if (!user && !token) navigate('/login', { replace: true })
+  }, [user, token, navigate])
 
   const doLogout = async () => {
-    try { await signOut(auth) } catch (_) {}
-    localStorage.removeItem('authToken')
+    await logout()
     navigate('/login', { replace: true })
   }
 

@@ -1,13 +1,11 @@
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import Underline from '@tiptap/extension-underline'
-import Link from '@tiptap/extension-link'
+import { EditorContent } from '@tiptap/react'
 import { sendMail } from '../services/mail'
-import { auth } from '../firebase'
+import { useAuth } from '../hooks/useAuth'
+import { useTiptap } from '../hooks/useTiptap'
 
 const composeSchema = z.object({
   to: z.string().trim().email('Enter a valid recipient email'),
@@ -18,8 +16,8 @@ const composeSchema = z.object({
 function Compose() {
   const [serverError, setServerError] = useState('')
   const [success, setSuccess] = useState('')
-  const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : ''
-  const from = auth.currentUser?.email || ''
+  const { user, token } = useAuth()
+  const from = user?.email || ''
 
   const { register, handleSubmit, formState: { errors, isValid }, reset, setValue } = useForm({
     resolver: zodResolver(composeSchema),
@@ -27,25 +25,11 @@ function Compose() {
     defaultValues: { to: '', subject: '', body: '' },
   })
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Underline,
-      Link.configure({
-        openOnClick: true,
-        autolink: true,
-        linkOnPaste: true,
-      }),
-    ],
-    content: '',
-    editorProps: {
-      attributes: { class: 'form-control p-3 prose border' },
-    },
+  const editor = useTiptap({
     onUpdate: ({ editor }) => {
-      // Sync to form state
       const html = editor.getHTML()
       setValue('body', html, { shouldValidate: false })
-    }
+    },
   })
 
   const onSubmit = async (values) => {
