@@ -5,11 +5,13 @@ import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { ref, set } from 'firebase/database'
 import { auth, db } from '../firebase'
 import { signupSchema, passwordChecks } from '../features/auth/validation'
+import { useNavigate } from 'react-router-dom'
 
 function Signup() {
   const [loading, setLoading] = useState(false)
   const [serverError, setServerError] = useState('')
   const [success, setSuccess] = useState('')
+  const navigate = useNavigate()
 
   const {
     register,
@@ -50,9 +52,10 @@ function Signup() {
         createdAt: new Date().toISOString(),
       })
 
-      console.log('User has successfully signed up')
-      setSuccess('Account created successfully. You can now log in.')
-      reset()
+  console.log('User has successfully signed up')
+  setSuccess('Account created successfully. Redirecting to login…')
+  reset()
+  navigate('/login', { replace: true })
     } catch (err) {
       const code = err?.code || 'auth/unknown'
       let message = 'Something went wrong. Please try again.'
@@ -174,6 +177,13 @@ function Signup() {
                         disabled={!isValid || loading}
                       >
                         {loading ? 'Creating account…' : 'Sign up'}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary w-100 mt-2"
+                        onClick={() => navigate('/login')}
+                      >
+                        Already have an account? Login
                       </button>
                     </form>
                   </div>
